@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OctopusMailer - Intelligent Email Marketing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Floating decorative elements -->
+    <div class="floating-tentacle"></div>
+    <div class="floating-tentacle"></div>
+    <div class="floating-tentacle"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">
+            <div class="octopus-icon"></div>
+            <span>OctopusMailer</span>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item active" data-page="email-sender">Email Sender</li>
+            <li class="nav-item" data-page="analytics">Analytics</li>
+            <li class="nav-item" data-page="ai-templates">AI Templates</li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Email Sender Page -->
+            <section id="email-sender" class="page active">
+                <h1 class="page-title">Compose, randomly!</h1>
+                
+                <div class="composer-container">
+                    <div class="email-builder" id="email-builder">
+                        <p style="color: var(--text-secondary); text-align: center; margin-top: 2rem;">
+                            Drag email blocks here to build your campaign
+                        </p>
+                    </div>
+                    
+                    <div class="block-palette">
+                        <h3 class="card-title">Email Blocks</h3>
+                        <div class="email-block" draggable="true" data-block="header">
+                            <strong>Header</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Drag & Drop</p>
+                        </div>
+                        <div class="email-block" draggable="true" data-block="hero">
+                            <strong>Hero Section</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Start Here</p>
+                        </div>
+                        <div class="email-block" draggable="true" data-block="content">
+                            <strong>Content Block</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Your Big Idea</p>
+                        </div>
+                        <div class="email-block" draggable="true" data-block="cta">
+                            <strong>Call to Action</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Button and link</p>
+                        </div>
+                        <div class="email-block" draggable="true" data-block="footer">
+                            <strong>Footer</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Contact and unsubscribe</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 2rem;">
+    <h2 class="card-title">Campaign Settings</h2>
+
+    <div class="grid grid-2">
+        <div class="form-group">
+            <label class="form-label">Campaign Name</label>
+            <input type="text" class="form-input" placeholder="Enter campaign name" id="campaign-name">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Subject Line</label>
+            <input type="text" class="form-input" placeholder="Enter subject line" id="subject-line">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Recipients</label>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <input type="file" class="form-input" accept=".csv" id="csv-upload">
+            <button class="btn btn-secondary" onclick="loadSampleRecipients()">Load Sample</button>
+        </div>
+        <div id="recipient-count" style="color: var(--text-secondary); margin-top: 0.5rem;"></div>
+    </div>
+
+    <!-- 🔥 New Message Box -->
+    <div class="form-group">
+        <label class="form-label">Message</label>
+        <textarea class="form-input" placeholder="Write a short message to go along with the email..." rows="4" id="custom-message"></textarea>
+    </div>
+
+    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+        <button class="btn btn-secondary" onclick="previewEmail()">Preview</button>
+        <button class="btn btn-primary" onclick="sendEmail()" id="send-btn">
+            <span id="send-text">Send Campaign</span>
+            <div id="send-loading" class="loading" style="display: none;"></div>
+        </button>
+    </div>
+</div>
+
+            </section>
+
+            <!-- Analytics Page -->
+            <section id="analytics" class="page">
+                <h1 class="page-title">Campaign Analytics</h1>
+                
+                <div class="grid grid-3">
+                    <div class="metric-card">
+                        <div class="metric-value" id="emails-sent">12,847</div>
+                        <div class="metric-label">Emails Sent</div>
+                    </div>
+                   <!-- <div class="metric-card">
+                        <div class="metric-value" id="open-rate">68.5%</div>
+                        <div class="metric-label">Open Rate</div>
+                    </div>-->
+                    <div class="metric-card">
+                        <div class="metric-value" id="click-rate">24.3%</div>
+                        <div class="metric-label">Click Rate</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-2" style="margin-top: 2rem;">
+                    <div class="card">
+                        <h2 class="card-title">Campaign Performance</h2>
+                        <div class="chart-container">
+                            <div class="chart-placeholder">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
+                                <p>Interactive charts coming soon</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2 class="card-title">Recent Campaigns</h2>
+                        <div style="space-y: 1rem;">
+                            <div style="display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid var(--border-soft);">
+                                <div>
+                                    <div style="font-weight: 500;">Summer Sale Newsletter</div>
+                                    <div style="color: var(--text-secondary); font-size: 0.9rem;">Sent 2 hours ago</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="color: var(--accent-orange); font-weight: 500;">72.3%</div>
+                                    <div style="color: var(--text-secondary); font-size: 0.9rem;">Open rate</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid var(--border-soft);">
+                                <div>
+                                    <div style="font-weight: 500;">Product Launch</div>
+                                    <div style="color: var(--text-secondary); font-size: 0.9rem;">Sent yesterday</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="color: var(--accent-pink); font-weight: 500;">45.1%</div>
+                                    <div style="color: var(--text-secondary); font-size: 0.9rem;">Click rate</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 1rem 0;">
+                                <div>
+                                    <div style="font-weight: 500;">Weekly Digest</div>
+                                    <div style="color: var(--text-secondary); font-size: 0.9rem;">Sent 3 days ago</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="color: var(--accent-orange); font-weight: 500;">58.7%</div>
+                                    <div style="color: var(--text-secondary); font-size: 0.9rem;">Open rate</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 2rem;">
+                    <h2 class="card-title">Geographic Performance</h2>
+                    <div class="chart-container">
+                        <div class="chart-placeholder">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🗺️</div>
+                            <p>Geographic analytics visualization</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Templates Page -->
+            <section id="ai-templates" class="page">
+                <h1 class="page-title">AI Email Templates</h1>
+
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-category="all">All Templates</button>
+                    <button class="filter-btn" data-category="newsletter">Newsletter</button>
+                    <button class="filter-btn" data-category="promotion">Promotion</button>
+                    <button class="filter-btn" data-category="product">Product Launch</button>
+                    <button class="filter-btn" data-category="event">Event</button>
+                </div>
+
+                <div class="template-grid">
+                    <div class="template-card" data-category="newsletter">
+                        <div class="template-preview">Newsletter Template</div>
+                        <div class="template-info">
+                            <div class="template-title">Modern Newsletter</div>
+                            <div class="template-description">Clean and modern newsletter design with hero section and content blocks.</div>
+                            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="useTemplate('newsletter')">Use Template</button>
+                        </div>
+                    </div>
+
+                    <div class="template-card" data-category="promotion">
+                        <div class="template-preview">Sale Template</div>
+                        <div class="template-info">
+                            <div class="template-title">Flash Sale Alert</div>
+                            <div class="template-description">Eye-catching promotional email perfect for sales and special offers.</div>
+                            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="useTemplate('promotion')">Use Template</button>
+                        </div>
+                    </div>
+
+                    <div class="template-card" data-category="product">
+                        <div class="template-preview">Product Template</div>
+                        <div class="template-info">
+                            <div class="template-title">Product Showcase</div>
+                            <div class="template-description">Showcase your latest products with beautiful imagery and compelling CTAs.</div>
+                            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="useTemplate('product')">Use Template</button>
+                        </div>
+                    </div>
+
+                    <div class="template-card" data-category="event">
+                        <div class="template-preview">Event Template</div>
+                        <div class="template-info">
+                            <div class="template-title">Event Invitation</div>
+                            <div class="template-description">Professional event invitation template with RSVP functionality.</div>
+                            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="useTemplate('event')">Use Template</button>
+                        </div>
+                    </div>
+
+                    <div class="template-card" data-category="newsletter">
+                        <div class="template-preview">Weekly Digest</div>
+                        <div class="template-info">
+                            <div class="template-title">Weekly Roundup</div>
+                            <div class="template-description">Perfect for weekly newsletters and content roundups.</div>
+                            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="useTemplate('weekly')">Use Template</button>
+                        </div>
+                    </div>
+
+                    <div class="template-card" data-category="promotion">
+                        <div class="template-preview">Welcome Series</div>
+                        <div class="template-info">
+                            <div class="template-title">Welcome Email</div>
+                            <div class="template-description">Warm welcome email for new subscribers and customers.</div>
+                            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="useTemplate('welcome')">Use Template</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 3rem; text-align: center;">
+                    <h2 class="card-title">Generate Custom Template</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Let AI create a personalized email template based on your requirements.</p>
+                    
+                    <div class="form-group" style="max-width: 600px; margin: 0 auto;">
+                        <input type="text" class="form-input" placeholder="Describe your ideal email template..." id="ai-prompt">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="generateAITemplate()" id="generate-btn" style="margin-top: 1rem;">
+                        <span id="generate-text">Generate with AI</span>
+                        <div id="generate-loading" class="loading" style="display: none;"></div>
+                    </button>
+                </div>
+            </section>
+        </div>
+    </main>
+<script src="script.js"></script>
+    
+</body>
+</html>
