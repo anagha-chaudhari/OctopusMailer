@@ -36,7 +36,7 @@
                 <div class="composer-container">
                     <div class="email-builder" id="email-builder">
                         <p style="color: var(--text-secondary); text-align: center; margin-top: 2rem;">
-                            Drag email blocks here to build your campaign
+                            Drag email blocks here to build your letter
                         </p>
                     </div>
                     
@@ -66,7 +66,7 @@
                 </div>
 
                 <div class="card" style="margin-top: 2rem;">
-    <h2 class="card-title">Campaign Settings</h2>
+    <h2 class="card-title">Edit</h2>
 
     <div class="grid grid-2">
         <div class="form-group">
@@ -129,8 +129,7 @@
                         <h2 class="card-title">Campaign Performance</h2>
                         <div class="chart-container">
                             <div class="chart-placeholder">
-                                <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
-                                <p>Interactive charts coming soon</p>
+                                <canvas id="tentacleChart" width="600" height="320" style="max-width:100%;border-radius:2rem;"></canvas>
                             </div>
                         </div>
                     </div>
@@ -196,57 +195,66 @@
                 </div>
 
                 <div class="template-grid">
-                    <div class="template-card" data-category="newsletter">
-                        <div class="template-preview">Newsletter Template</div>
-                        <div class="template-info">
-                            <div class="template-title">Modern Newsletter</div>
-                            <div class="template-description">Clean and modern newsletter design with hero section and content blocks.</div>
-                            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="useTemplate('newsletter')">Use Template</button>
-                        </div>
-                    </div>
-
-                    <div class="template-card" data-category="promotion">
-                        <div class="template-preview">Sale Template</div>
-                        <div class="template-info">
-                            <div class="template-title">Flash Sale Alert</div>
-                            <div class="template-description">Eye-catching promotional email perfect for sales and special offers.</div>
-                            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="useTemplate('promotion')">Use Template</button>
-                        </div>
-                    </div>
-
                     <div class="template-card" data-category="product">
-                        <div class="template-preview">Product Template</div>
+                        <div class="template-preview">Product Launch Announcement</div>
                         <div class="template-info">
-                            <div class="template-title">Product Showcase</div>
-                            <div class="template-description">Showcase your latest products with beautiful imagery and compelling CTAs.</div>
-                            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="useTemplate('product')">Use Template</button>
+                            <div class="template-title">Product Launch</div>
+                            <div class="template-description">Announce your new product with a bold hero, feature highlights, and a clear CTA to shop or learn more.</div>
+                            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="useTemplate('product-launch')">Use Template</button>
                         </div>
                     </div>
 
                     <div class="template-card" data-category="event">
-                        <div class="template-preview">Event Template</div>
+                        <div class="template-preview">Event Invitation</div>
                         <div class="template-info">
                             <div class="template-title">Event Invitation</div>
-                            <div class="template-description">Professional event invitation template with RSVP functionality.</div>
-                            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="useTemplate('event')">Use Template</button>
-                        </div>
-                    </div>
-
-                    <div class="template-card" data-category="newsletter">
-                        <div class="template-preview">Weekly Digest</div>
-                        <div class="template-info">
-                            <div class="template-title">Weekly Roundup</div>
-                            <div class="template-description">Perfect for weekly newsletters and content roundups.</div>
-                            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="useTemplate('weekly')">Use Template</button>
+                            <div class="template-description">Invite contacts to your event with RSVP buttons, event details, and a professional layout.</div>
+                            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="useTemplate('event-invite')">Use Template</button>
                         </div>
                     </div>
 
                     <div class="template-card" data-category="promotion">
-                        <div class="template-preview">Welcome Series</div>
+                        <div class="template-preview">Seasonal Sale Promotion</div>
                         <div class="template-info">
-                            <div class="template-title">Welcome Email</div>
-                            <div class="template-description">Warm welcome email for new subscribers and customers.</div>
-                            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="useTemplate('welcome')">Use Template</button>
+                            <div class="template-title">Seasonal Sale</div>
+                            <div class="template-description">Promote your seasonal sale with eye-catching banners, discount codes, and urgency-driven CTAs.</div>
+                            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="useTemplate('seasonal-sale')">Use Template</button>
+                        </div>
+                    </div>
+
+                    <div class="template-card" data-category="newsletter">
+                        <div class="template-preview">Customer Appreciation</div>
+                        <div class="template-info">
+                            <div class="template-title">Customer Appreciation</div>
+                            <div class="template-description">Thank your loyal customers with a heartfelt message, exclusive offer, and a personal touch.</div>
+                            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="useTemplate('customer-appreciation')">Use Template</button>
+                        </div>
+                    </div>
+
+                    <div class="template-card" data-category="event">
+                        <div class="template-preview">Webinar Registration</div>
+                        <div class="template-info">
+                            <div class="template-title">Webinar Invite</div>
+                            <div class="template-description">Drive registrations for your webinar with agenda highlights, speaker bios, and a registration CTA.</div>
+                            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="useTemplate('webinar')">Use Template</button>
+                        </div>
+                    </div>
+
+                    <div class="template-card" data-category="promotion">
+                        <div class="template-preview">Survey Request</div>
+                        <div class="template-info">
+                            <div class="template-title">Survey Request</div>
+                            <div class="template-description">Encourage feedback with a professional survey request, clear instructions, and a direct link to participate.</div>
+                            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="useTemplate('survey')">Use Template</button>
+                        </div>
+                    </div>
+
+                    <div class="template-card" data-category="newsletter">
+                        <div class="template-preview">Re-engagement Campaign</div>
+                        <div class="template-info">
+                            <div class="template-title">Re-engagement</div>
+                            <div class="template-description">Win back inactive subscribers with a friendly message, special offer, and easy opt-in button.</div>
+                            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="useTemplate('reengagement')">Use Template</button>
                         </div>
                     </div>
                 </div>
@@ -268,6 +276,9 @@
         </div>
     </main>
 <script src="script.js"></script>
-    
+</main>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="tentacleChart.js"></script>
 </body>
 </html>

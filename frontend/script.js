@@ -84,7 +84,7 @@ function addBlockToBuilder(blockType) {
             blockContent = `
                 <div class="editable-block" contenteditable="true">
                     <h3 style="font-size: 1.5rem; color: #50e3c2;">💡 The "Aha!" Moment</h3>
-                    <p style="font-size: 1rem; line-height: 1.6; border: px solid #50e3c2; padding-left: 10px;">This is where you drop the knowledge bombs. Share a cool tip, a fun fact, or the inside scoop on what you've been building. Make them feel like they're in on a secret!</p>
+                    <p style="font-size: 1rem; line-height: 1.6; border: 1px solid #50e3c2; padding-left: 10px;">This is where you drop the knowledge bombs. Share a cool tip, a fun fact, or the inside scoop on what you've been building. Make them feel like they're in on a secret!</p>
                 </div>`;
             break;
         case 'cta':
@@ -114,6 +114,309 @@ function addBlockToBuilder(blockType) {
     
     blockElement.innerHTML += blockContent;
     blockElement.appendChild(removeButton);
+
+    // Add editing palette to each editable block (modern Selection/Range API)
+    setTimeout(() => {
+        blockElement.querySelectorAll('.editable-block').forEach(editable => {
+            // Create palette
+            const palette = document.createElement('div');
+            palette.className = 'editing-palette';
+            palette.style.cssText = `
+                display: none;
+                position: relative;
+                margin-bottom: 0.7rem;
+                z-index: 10;
+                background: linear-gradient(135deg, rgba(255, 175, 189, 0.85) 0%, rgba(255, 195, 113, 0.85) 100%);
+                border-radius: 2.2rem 2.2rem 1.2rem 1.2rem / 2.2rem 2.2rem 1.2rem 1.2rem;
+                box-shadow: 0 8px 32px rgba(255, 175, 189, 0.18), 0 2px 8px rgba(255, 195, 113, 0.13);
+                padding: 0.7rem 1.4rem;
+                gap: 1rem;
+                align-items: center;
+                border: 2px solid rgba(255, 195, 113, 0.35);
+                min-width: 240px;
+                justify-content: center;
+                top: 0;
+                left: 0;
+                transform: none;
+                backdrop-filter: blur(12px);
+            `;
+
+            // Add custom styles for palette controls
+            const paletteStyle = document.createElement('style');
+            paletteStyle.textContent = `
+                .editing-palette {
+                    display: flex;
+                    flex-wrap: wrap;
+                    backdrop-filter: blur(12px);
+                    box-shadow: 0 8px 32px rgba(255,175,189,0.18), 0 2px 8px rgba(255,195,113,0.13);
+                    border-radius: 2.2rem 2.2rem 1.2rem 1.2rem / 2.2rem 2.2rem 1.2rem 1.2rem;
+                    border: 2px solid rgba(255,195,113,0.35);
+                    background: linear-gradient(135deg, rgba(255, 141, 160, 1) 0%, rgba(255, 196, 113, 1) 100%);
+                    min-width: 240px;
+                    padding: 0.7rem 1.4rem;
+                    gap: 1rem;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .editing-palette input[type="color"] {
+                    width: 32px;
+                    height: 32px;
+                    border: none;
+                    background: none;
+                    cursor: pointer;
+                    border-radius: 50%;
+                    box-shadow: 0 2px 8px rgba(255,195,113,0.13);
+                    transition: box-shadow 0.2s;
+                }
+                .editing-palette input[type="color"]:hover {
+                    box-shadow: 0 4px 16px rgba(255,175,189,0.23);
+                }
+                .editing-palette select {
+                    font-size: 1.1rem;
+                    padding: 0.5rem 1rem;
+                    border-radius: 1.2rem;
+                    border: 2px solid #ffafbd;
+                    background: rgba(255,255,255,0.7);
+                    color: #ff6f61;
+                    font-family: 'JetBrains Mono', 'Inter', Arial, sans-serif;
+                    box-shadow: 0 2px 8px rgba(255,175,189,0.07);
+                }
+                .editing-palette button {
+                    font-size: 1.3rem;
+                    padding: 0.5rem 1rem;
+                    border-radius: 1.2rem;
+                    border: none;
+                    background: linear-gradient(135deg, #ff955cff 0%, #ff7e89ff 100%);
+                    color: #fff;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: box-shadow 0.2s, transform 0.2s;
+                    box-shadow: 0 2px 8px rgba(255,175,189,0.07);
+                    margin-right: 0.2rem;
+                    font-family: 'JetBrains Mono', 'Inter', Arial, sans-serif;
+                    border-bottom: 3px solid #1d1d1dff;
+                }
+                .editing-palette button.active {
+                    background: linear-gradient(135deg, #ff955cff 0%, #ff7e89ff 100%);
+                    color: #ff6f61;
+                    border-bottom: 3px solid #ffafbd;
+                }
+                .editing-palette button:last-child {
+                    margin-right: 0;
+                }
+                .editing-palette button:hover {
+                    box-shadow: 0 8px 32px rgba(255,175,189,0.18);
+                    background: linear-gradient(135deg, #8edcdcff 0%, #8fd7a8ff 100%);
+                    transform: scale(0.97);
+                    border-bottom: none;
+                }
+            `;
+            document.head.appendChild(paletteStyle);
+
+            // Helper to wrap selection in a span with style, or remove style if toggling off
+            function styleSelection(styleObj, removeStyleKey = null) {
+                const sel = window.getSelection();
+                if (!sel.rangeCount) return;
+                let range = sel.getRangeAt(0);
+                if (!range || !sel.anchorNode || !editable.contains(sel.anchorNode)) return;
+
+                // If selection is collapsed (no text selected), select the word under the cursor
+                if (sel.isCollapsed) {
+                    const node = sel.anchorNode;
+                    if (node && node.nodeType === Node.TEXT_NODE) {
+                        const text = node.textContent;
+                        const offset = sel.anchorOffset;
+                        let start = offset, end = offset;
+                        while (start > 0 && /\S/.test(text[start - 1])) start--;
+                        while (end < text.length && /\S/.test(text[end])) end++;
+                        range = document.createRange();
+                        range.setStart(node, start);
+                        range.setEnd(node, end);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    }
+                }
+
+                // Remove style if toggling off
+                if (!sel.isCollapsed && removeStyleKey) {
+                    // Try to unwrap span with the style
+                    const contents = range.cloneContents();
+                    let found = false;
+                    // Only unwrap if the selection is inside a span with the style
+                    if (range.startContainer.parentElement && range.startContainer.parentElement.tagName === 'SPAN') {
+                        const span = range.startContainer.parentElement;
+                        if (span.style[removeStyleKey]) {
+                            // Replace span with its children
+                            const parent = span.parentNode;
+                            while (span.firstChild) parent.insertBefore(span.firstChild, span);
+                            parent.removeChild(span);
+                            found = true;
+                        }
+                    }
+                    if (found) {
+                        sel.removeAllRanges();
+                        const newRange = document.createRange();
+                        newRange.selectNodeContents(editable);
+                        newRange.collapse(false);
+                        sel.addRange(newRange);
+                        return;
+                    }
+                }
+
+                // Only style if range has content
+                if (!sel.isCollapsed) {
+                    const span = document.createElement('span');
+                    Object.assign(span.style, styleObj);
+                    span.appendChild(range.extractContents());
+                    range.insertNode(span);
+                    // Move cursor after span
+                    sel.removeAllRanges();
+                    const newRange = document.createRange();
+                    newRange.setStartAfter(span);
+                    newRange.collapse(true);
+                    sel.addRange(newRange);
+                }
+            }
+
+            // Font color
+            const colorInput = document.createElement('input');
+            colorInput.type = 'color';
+            colorInput.title = 'Text Color';
+            colorInput.style.marginRight = '6px';
+            colorInput.oninput = () => {
+                styleSelection({ color: colorInput.value });
+            };
+            palette.appendChild(colorInput);
+
+            // Font family
+            const fontSelect = document.createElement('select');
+            fontSelect.title = 'Font Family';
+            ['Inter', 'Arial', 'JetBrains Mono', 'Georgia', 'Times New Roman', 'Courier New'].forEach(font => {
+                const opt = document.createElement('option');
+                opt.value = font;
+                opt.textContent = font;
+                fontSelect.appendChild(opt);
+            });
+            fontSelect.onchange = () => {
+                styleSelection({ fontFamily: fontSelect.value });
+            };
+            palette.appendChild(fontSelect);
+
+            // Bold (toggle)
+            const boldBtn = document.createElement('button');
+            boldBtn.type = 'button';
+            boldBtn.innerHTML = '<b>B</b>';
+            boldBtn.title = 'Bold';
+            boldBtn.style.marginRight = '4px';
+            boldBtn.onclick = () => {
+                const sel = window.getSelection();
+                let isActive = false;
+                if (sel.rangeCount && sel.anchorNode && editable.contains(sel.anchorNode)) {
+                    const node = sel.anchorNode;
+                    if (node && node.nodeType === Node.TEXT_NODE) {
+                        isActive = node.parentElement && node.parentElement.style.fontWeight === 'bold';
+                    } else if (node && node.nodeType === Node.ELEMENT_NODE) {
+                        isActive = node.style.fontWeight === 'bold';
+                    }
+                }
+                if (isActive) {
+                    styleSelection({}, 'fontWeight');
+                } else {
+                    styleSelection({ fontWeight: 'bold' });
+                }
+            };
+            palette.appendChild(boldBtn);
+
+            // Italic (toggle)
+            const italicBtn = document.createElement('button');
+            italicBtn.type = 'button';
+            italicBtn.innerHTML = '<i>I</i>';
+            italicBtn.title = 'Italic';
+            italicBtn.style.marginRight = '4px';
+            italicBtn.onclick = () => {
+                const sel = window.getSelection();
+                let isActive = false;
+                if (sel.rangeCount && sel.anchorNode && editable.contains(sel.anchorNode)) {
+                    const node = sel.anchorNode;
+                    if (node && node.nodeType === Node.TEXT_NODE) {
+                        isActive = node.parentElement && node.parentElement.style.fontStyle === 'italic';
+                    } else if (node && node.nodeType === Node.ELEMENT_NODE) {
+                        isActive = node.style.fontStyle === 'italic';
+                    }
+                }
+                if (isActive) {
+                    styleSelection({}, 'fontStyle');
+                } else {
+                    styleSelection({ fontStyle: 'italic' });
+                }
+            };
+            palette.appendChild(italicBtn);
+
+            // Underline (toggle)
+            const underlineBtn = document.createElement('button');
+            underlineBtn.type = 'button';
+            underlineBtn.innerHTML = '<u>U</u>';
+            underlineBtn.title = 'Underline';
+            underlineBtn.style.marginRight = '4px';
+            underlineBtn.onclick = () => {
+                const sel = window.getSelection();
+                let isActive = false;
+                if (sel.rangeCount && sel.anchorNode && editable.contains(sel.anchorNode)) {
+                    const node = sel.anchorNode;
+                    if (node && node.nodeType === Node.TEXT_NODE) {
+                        isActive = node.parentElement && node.parentElement.style.textDecoration === 'underline';
+                    } else if (node && node.nodeType === Node.ELEMENT_NODE) {
+                        isActive = node.style.textDecoration === 'underline';
+                    }
+                }
+                if (isActive) {
+                    styleSelection({}, 'textDecoration');
+                } else {
+                    styleSelection({ textDecoration: 'underline' });
+                }
+            };
+            palette.appendChild(underlineBtn);
+
+            // Show/hide palette on focus/blur, mouseover/mouseout
+            editable.style.position = 'relative';
+            let paletteHovered = false;
+            let editableFocused = false;
+
+            function showPalette() {
+                palette.style.display = 'flex';
+            }
+            function hidePalette() {
+                if (!paletteHovered && !editableFocused) {
+                    palette.style.display = 'none';
+                }
+            }
+
+            editable.addEventListener('focus', () => {
+                editableFocused = true;
+                showPalette();
+            });
+            editable.addEventListener('blur', () => {
+                editableFocused = false;
+                setTimeout(hidePalette, 150);
+            });
+            editable.addEventListener('click', () => {
+                editableFocused = true;
+                showPalette();
+            });
+
+            palette.addEventListener('mouseenter', () => {
+                paletteHovered = true;
+                showPalette();
+            });
+            palette.addEventListener('mouseleave', () => {
+                paletteHovered = false;
+                setTimeout(hidePalette, 150);
+            });
+
+            // Insert palette above the editable block
+            editable.parentElement.insertBefore(palette, editable);
+        });
+    }, 0);
 
     // Event listener for image upload buttons
     blockElement.querySelectorAll('.image-upload-btn').forEach(btn => {
@@ -176,7 +479,37 @@ function loadSampleRecipients() {
 }
 
 function previewEmail() {
-    alert('🔍 Email preview would open in a new window');
+    const emailBuilder = document.getElementById('email-builder');
+    const emailHTML = Array.from(emailBuilder.querySelectorAll('.editable-block'))
+        .map(block => block.innerHTML)
+        .join('');
+
+    // Optionally include the custom message
+    const customMessage = document.getElementById('custom-message').value;
+    let previewContent = '';
+    if (customMessage && customMessage.trim()) {
+        previewContent += `<div style="margin-bottom:2rem; color:var(--text-secondary); font-size:1.1rem;">${customMessage}</div>`;
+    }
+    previewContent += emailHTML;
+
+    // Open in new tab and write the preview HTML
+    const previewWindow = window.open('', '_blank');
+    previewWindow.document.write(`<!DOCTYPE html>
+    <html lang='en'>
+    <head>
+        <meta charset='UTF-8'>
+        <title>Email Preview</title>
+        <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap' rel='stylesheet'>
+        <style>
+            body { font-family: 'Inter', Arial, sans-serif; background: #f8f9fa; padding: 2rem; color: #222; }
+            .email-preview { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 6px; box-shadow: 0 2px 16px rgba(63, 63, 63, 0.07); padding: 2rem; }
+        </style>
+    </head>
+    <body>
+        <div class='email-preview'>${previewContent}</div>
+    </body>
+    </html>`);
+    previewWindow.document.close();
 }
 
 function sendEmail() {
@@ -270,7 +603,7 @@ function initializeTemplateFiltering() {
 }
 
 function useTemplate(templateType) {
-    alert(`🎨 Loading ${templateType} template into email composer...`);
+    alert(`🎨 Loading ${templateType.replace(/-/g, ' ')} template into email composer...`);
 
     document.querySelector('[data-page="email-sender"]').click();
 
@@ -278,11 +611,388 @@ function useTemplate(templateType) {
         const emailBuilder = document.getElementById('email-builder');
         emailBuilder.innerHTML = '';
 
-        addBlockToBuilder('header');
-        setTimeout(() => addBlockToBuilder('hero'), 200);
-        setTimeout(() => addBlockToBuilder('content'), 400);
-        setTimeout(() => addBlockToBuilder('cta'), 600);
-        setTimeout(() => addBlockToBuilder('footer'), 800);
+        // Helper to add block with starter text
+        function addBlock(type, starterHTML) {
+            const emailBuilder = document.getElementById('email-builder');
+            const blockElement = document.createElement('div');
+            blockElement.className = 'card email-content-block';
+            blockElement.style.margin = '1rem 0';
+            blockElement.style.cursor = 'grab';
+            let html = starterHTML;
+            blockElement.innerHTML = `<div class="editable-block" contenteditable="true">${html}</div>`;
+            emailBuilder.appendChild(blockElement);
+            blockElement.classList.add('success-animation');
+
+            // Add editing palette to each editable block (same as addBlockToBuilder)
+            setTimeout(() => {
+                blockElement.querySelectorAll('.editable-block').forEach(editable => {
+                    // Create palette
+                    const palette = document.createElement('div');
+                    palette.className = 'editing-palette';
+                    palette.style.cssText = `
+                        display: none;
+                        position: relative;
+                        margin-bottom: 0.7rem;
+                        z-index: 10;
+                        background: linear-gradient(135deg, rgba(255, 175, 189, 0.85) 0%, rgba(255, 195, 113, 0.85) 100%);
+                        border-radius: 2.2rem 2.2rem 1.2rem 1.2rem / 2.2rem 2.2rem 1.2rem 1.2rem;
+                        box-shadow: 0 8px 32px rgba(255, 175, 189, 0.18), 0 2px 8px rgba(255, 195, 113, 0.13);
+                        padding: 0.7rem 1.4rem;
+                        gap: 1rem;
+                        align-items: center;
+                        border: 2px solid rgba(255, 195, 113, 0.35);
+                        min-width: 240px;
+                        justify-content: center;
+                        top: 0;
+                        left: 0;
+                        transform: none;
+                        backdrop-filter: blur(12px);
+                    `;
+
+                    // Add custom styles for palette controls
+                    const paletteStyle = document.createElement('style');
+                    paletteStyle.textContent = `
+                        .editing-palette {
+                            display: flex;
+                            flex-wrap: wrap;
+                            backdrop-filter: blur(12px);
+                            box-shadow: 0 8px 32px rgba(255,175,189,0.18), 0 2px 8px rgba(255,195,113,0.13);
+                            border-radius: 2.2rem 2.2rem 1.2rem 1.2rem / 2.2rem 2.2rem 1.2rem 1.2rem;
+                            border: 2px solid rgba(255,195,113,0.35);
+                            background: linear-gradient(135deg, rgba(255, 141, 160, 1) 0%, rgba(255, 196, 113, 1) 100%);
+                            min-width: 240px;
+                            padding: 0.7rem 1.4rem;
+                            gap: 1rem;
+                            align-items: center;
+                            justify-content: center;
+                        }
+                        .editing-palette input[type="color"] {
+                            width: 32px;
+                            height: 32px;
+                            border: none;
+                            background: none;
+                            cursor: pointer;
+                            border-radius: 50%;
+                            box-shadow: 0 2px 8px rgba(255,195,113,0.13);
+                            transition: box-shadow 0.2s;
+                        }
+                        .editing-palette input[type="color"]:hover {
+                            box-shadow: 0 4px 16px rgba(255,175,189,0.23);
+                        }
+                        .editing-palette select {
+                            font-size: 1.1rem;
+                            padding: 0.5rem 1rem;
+                            border-radius: 1.2rem;
+                            border: 2px solid #ffafbd;
+                            background: rgba(255,255,255,0.7);
+                            color: #ff6f61;
+                            font-family: 'JetBrains Mono', 'Inter', Arial, sans-serif;
+                            box-shadow: 0 2px 8px rgba(255,175,189,0.07);
+                        }
+                        .editing-palette button {
+                            font-size: 1.3rem;
+                            padding: 0.5rem 1rem;
+                            border-radius: 1.2rem;
+                            border: none;
+                            background: linear-gradient(135deg, #ff955cff 0%, #ff7e89ff 100%);
+                            color: #fff;
+                            font-weight: 700;
+                            cursor: pointer;
+                            transition: box-shadow 0.2s, transform 0.2s;
+                            box-shadow: 0 2px 8px rgba(255,175,189,0.07);
+                            margin-right: 0.2rem;
+                            font-family: 'JetBrains Mono', 'Inter', Arial, sans-serif;
+                            border-bottom: 3px solid #1d1d1dff;
+                        }
+                        .editing-palette button.active {
+                            background: linear-gradient(135deg, #ff955cff 0%, #ff7e89ff 100%);
+                            color: #ff6f61;
+                            border-bottom: 3px solid #ffafbd;
+                        }
+                        .editing-palette button:last-child {
+                            margin-right: 0;
+                        }
+                        .editing-palette button:hover {
+                            box-shadow: 0 8px 32px rgba(255,175,189,0.18);
+                            background: linear-gradient(135deg, #8edcdcff 0%, #8fd7a8ff 100%);
+                            transform: scale(0.97);
+                            border-bottom: none;
+                        }
+                    `;
+                    document.head.appendChild(paletteStyle);
+
+                    // Helper to wrap selection in a span with style, or remove style if toggling off
+                    function styleSelection(styleObj, removeStyleKey = null) {
+                        const sel = window.getSelection();
+                        if (!sel.rangeCount) return;
+                        let range = sel.getRangeAt(0);
+                        if (!range || !sel.anchorNode || !editable.contains(sel.anchorNode)) return;
+
+                        // If selection is collapsed (no text selected), select the word under the cursor
+                        if (sel.isCollapsed) {
+                            const node = sel.anchorNode;
+                            if (node && node.nodeType === Node.TEXT_NODE) {
+                                const text = node.textContent;
+                                const offset = sel.anchorOffset;
+                                let start = offset, end = offset;
+                                while (start > 0 && /\S/.test(text[start - 1])) start--;
+                                while (end < text.length && /\S/.test(text[end])) end++;
+                                range = document.createRange();
+                                range.setStart(node, start);
+                                range.setEnd(node, end);
+                                sel.removeAllRanges();
+                                sel.addRange(range);
+                            }
+                        }
+
+                        // Remove style if toggling off
+                        if (!sel.isCollapsed && removeStyleKey) {
+                            // Try to unwrap span with the style
+                            const contents = range.cloneContents();
+                            let found = false;
+                            // Only unwrap if the selection is inside a span with the style
+                            if (range.startContainer.parentElement && range.startContainer.parentElement.tagName === 'SPAN') {
+                                const span = range.startContainer.parentElement;
+                                if (span.style[removeStyleKey]) {
+                                    // Replace span with its children
+                                    const parent = span.parentNode;
+                                    while (span.firstChild) parent.insertBefore(span.firstChild, span);
+                                    parent.removeChild(span);
+                                    found = true;
+                                }
+                            }
+                            if (found) {
+                                sel.removeAllRanges();
+                                const newRange = document.createRange();
+                                newRange.selectNodeContents(editable);
+                                newRange.collapse(false);
+                                sel.addRange(newRange);
+                                return;
+                            }
+                        }
+
+                        // Only style if range has content
+                        if (!sel.isCollapsed) {
+                            const span = document.createElement('span');
+                            Object.assign(span.style, styleObj);
+                            span.appendChild(range.extractContents());
+                            range.insertNode(span);
+                            // Move cursor after span
+                            sel.removeAllRanges();
+                            const newRange = document.createRange();
+                            newRange.setStartAfter(span);
+                            newRange.collapse(true);
+                            sel.addRange(newRange);
+                        }
+                    }
+
+                    // Font color
+                    const colorInput = document.createElement('input');
+                    colorInput.type = 'color';
+                    colorInput.title = 'Text Color';
+                    colorInput.style.marginRight = '6px';
+                    colorInput.oninput = () => {
+                        styleSelection({ color: colorInput.value });
+                    };
+                    palette.appendChild(colorInput);
+
+                    // Font family
+                    const fontSelect = document.createElement('select');
+                    fontSelect.title = 'Font Family';
+                    ['Inter', 'Arial', 'JetBrains Mono', 'Georgia', 'Times New Roman', 'Courier New'].forEach(font => {
+                        const opt = document.createElement('option');
+                        opt.value = font;
+                        opt.textContent = font;
+                        fontSelect.appendChild(opt);
+                    });
+                    fontSelect.onchange = () => {
+                        styleSelection({ fontFamily: fontSelect.value });
+                    };
+                    palette.appendChild(fontSelect);
+
+                    // Bold (toggle)
+                    const boldBtn = document.createElement('button');
+                    boldBtn.type = 'button';
+                    boldBtn.innerHTML = '<b>B</b>';
+                    boldBtn.title = 'Bold';
+                    boldBtn.style.marginRight = '4px';
+                    boldBtn.onclick = () => {
+                        const sel = window.getSelection();
+                        let isActive = false;
+                        if (sel.rangeCount && sel.anchorNode && editable.contains(sel.anchorNode)) {
+                            const node = sel.anchorNode;
+                            if (node && node.nodeType === Node.TEXT_NODE) {
+                                isActive = node.parentElement && node.parentElement.style.fontWeight === 'bold';
+                            } else if (node && node.nodeType === Node.ELEMENT_NODE) {
+                                isActive = node.style.fontWeight === 'bold';
+                            }
+                        }
+                        if (isActive) {
+                            styleSelection({}, 'fontWeight');
+                        } else {
+                            styleSelection({ fontWeight: 'bold' });
+                        }
+                    };
+                    palette.appendChild(boldBtn);
+
+                    // Italic (toggle)
+                    const italicBtn = document.createElement('button');
+                    italicBtn.type = 'button';
+                    italicBtn.innerHTML = '<i>I</i>';
+                    italicBtn.title = 'Italic';
+                    italicBtn.style.marginRight = '4px';
+                    italicBtn.onclick = () => {
+                        const sel = window.getSelection();
+                        let isActive = false;
+                        if (sel.rangeCount && sel.anchorNode && editable.contains(sel.anchorNode)) {
+                            const node = sel.anchorNode;
+                            if (node && node.nodeType === Node.TEXT_NODE) {
+                                isActive = node.parentElement && node.parentElement.style.fontStyle === 'italic';
+                            } else if (node && node.nodeType === Node.ELEMENT_NODE) {
+                                isActive = node.style.fontStyle === 'italic';
+                            }
+                        }
+                        if (isActive) {
+                            styleSelection({}, 'fontStyle');
+                        } else {
+                            styleSelection({ fontStyle: 'italic' });
+                        }
+                    };
+                    palette.appendChild(italicBtn);
+
+                    // Underline (toggle)
+                    const underlineBtn = document.createElement('button');
+                    underlineBtn.type = 'button';
+                    underlineBtn.innerHTML = '<u>U</u>';
+                    underlineBtn.title = 'Underline';
+                    underlineBtn.style.marginRight = '4px';
+                    underlineBtn.onclick = () => {
+                        const sel = window.getSelection();
+                        let isActive = false;
+                        if (sel.rangeCount && sel.anchorNode && editable.contains(sel.anchorNode)) {
+                            const node = sel.anchorNode;
+                            if (node && node.nodeType === Node.TEXT_NODE) {
+                                isActive = node.parentElement && node.parentElement.style.textDecoration === 'underline';
+                            } else if (node && node.nodeType === Node.ELEMENT_NODE) {
+                                isActive = node.style.textDecoration === 'underline';
+                            }
+                        }
+                        if (isActive) {
+                            styleSelection({}, 'textDecoration');
+                        } else {
+                            styleSelection({ textDecoration: 'underline' });
+                        }
+                    };
+                    palette.appendChild(underlineBtn);
+
+                    // Show/hide palette on focus/blur, mouseover/mouseout
+                    editable.style.position = 'relative';
+                    let paletteHovered = false;
+                    let editableFocused = false;
+
+                    function showPalette() {
+                        palette.style.display = 'flex';
+                    }
+                    function hidePalette() {
+                        if (!paletteHovered && !editableFocused) {
+                            palette.style.display = 'none';
+                        }
+                    }
+
+                    editable.addEventListener('focus', () => {
+                        editableFocused = true;
+                        showPalette();
+                    });
+                    editable.addEventListener('blur', () => {
+                        editableFocused = false;
+                        setTimeout(hidePalette, 150);
+                    });
+                    editable.addEventListener('click', () => {
+                        editableFocused = true;
+                        showPalette();
+                    });
+
+                    palette.addEventListener('mouseenter', () => {
+                        paletteHovered = true;
+                        showPalette();
+                    });
+                    palette.addEventListener('mouseleave', () => {
+                        paletteHovered = false;
+                        setTimeout(hidePalette, 150);
+                    });
+
+                    // Insert palette above the editable block
+                    editable.parentElement.insertBefore(palette, editable);
+                });
+            }, 0);
+
+            // For CTA block, clicking the link itself prompts for URL
+            if (type === 'cta') {
+                setTimeout(() => {
+                    blockElement.querySelectorAll('.editable-link').forEach(link => {
+                        link.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const newHref = prompt('Enter a new link URL:', link.href || 'https://');
+                            if (newHref && newHref !== null) {
+                                link.href = newHref;
+                            }
+                        });
+                    });
+                }, 0);
+            }
+        }
+
+        switch (templateType) {
+            case 'product-launch':
+                addBlock('header', `<h1 style='color:#4a90e2;'>Introducing Our Latest Product!</h1><p>We're excited to unveil something special. Discover the features below.</p>`);
+                setTimeout(() => addBlock('hero', `<h2 style='color:#ff6f61;'>Meet [Product Name]</h2><p>Designed to solve your biggest challenges. Sleek, smart, and ready for you.</p>`), 200);
+                setTimeout(() => addBlock('content', `<h3>Key Features</h3><ul><li>Feature 1: [Describe]</li><li>Feature 2: [Describe]</li><li>Feature 3: [Describe]</li></ul>`), 400);
+                setTimeout(() => addBlock('cta', `<p>Ready to experience the future?</p><a href='#' class='editable-link' style='color:white;background:#7b68ee;padding:12px 24px;border-radius:30px;'>Shop Now</a>`), 600);
+                setTimeout(() => addBlock('footer', `<p>Thank you for being part of our journey!</p><p style='font-size:0.8rem;color:#aaa;'>Unsubscribe | Contact Us</p>`), 800);
+                break;
+            case 'event-invite':
+                addBlock('header', `<h1 style='color:#4a90e2;'>You're Invited!</h1><p>Join us for an unforgettable event.</p>`);
+                setTimeout(() => addBlock('content', `<h3>Event Details</h3><ul><li>Date: [Insert Date]</li><li>Time: [Insert Time]</li><li>Location: [Insert Location]</li></ul><p>Don't miss out!</p>`), 200);
+                setTimeout(() => addBlock('cta', `<p>RSVP now to reserve your spot.</p><a href='#' class='editable-link' style='color:white;background:#7b68ee;padding:12px 24px;border-radius:30px;'>RSVP</a>`), 400);
+                setTimeout(() => addBlock('footer', `<p>We look forward to seeing you!</p><p style='font-size:0.8rem;color:#aaa;'>Unsubscribe | Contact Us</p>`), 600);
+                break;
+            case 'seasonal-sale':
+                addBlock('hero', `<h2 style='color:#ff6f61;'>Seasonal Sale Starts Now!</h2><p>Enjoy exclusive discounts for a limited time.</p>`);
+                setTimeout(() => addBlock('content', `<h3>Offers</h3><ul><li>Save 20% on all items</li><li>Free shipping over $50</li></ul><p>Hurry, while stocks last!</p>`), 200);
+                setTimeout(() => addBlock('cta', `<p>Shop the sale before it's gone!</p><a href='#' class='editable-link' style='color:white;background:#7b68ee;padding:12px 24px;border-radius:30px;'>Shop Sale</a>`), 400);
+                setTimeout(() => addBlock('footer', `<p>Thank you for shopping with us!</p><p style='font-size:0.8rem;color:#aaa;'>Unsubscribe | Contact Us</p>`), 600);
+                break;
+            case 'customer-appreciation':
+                addBlock('header', `<h1 style='color:#4a90e2;'>Thank You!</h1><p>We appreciate your loyalty and support.</p>`);
+                setTimeout(() => addBlock('content', `<h3>Your Story Matters</h3><p>We're grateful to have you as part of our community. Here's a special offer just for you.</p>`), 200);
+                setTimeout(() => addBlock('cta', `<p>Claim your exclusive reward!</p><a href='#' class='editable-link' style='color:white;background:#7b68ee;padding:12px 24px;border-radius:30px;'>Get Offer</a>`), 400);
+                setTimeout(() => addBlock('footer', `<p>With gratitude, [Your Brand]</p><p style='font-size:0.8rem;color:#aaa;'>Unsubscribe | Contact Us</p>`), 600);
+                break;
+            case 'webinar':
+                addBlock('header', `<h1 style='color:#4a90e2;'>Join Our Webinar!</h1><p>Learn from industry experts and grow your skills.</p>`);
+                setTimeout(() => addBlock('content', `<h3>Webinar Agenda</h3><ul><li>Speaker 1: [Bio]</li><li>Speaker 2: [Bio]</li><li>Topics: [List]</li></ul>`), 200);
+                setTimeout(() => addBlock('cta', `<p>Register now to secure your spot.</p><a href='#' class='editable-link' style='color:white;background:#7b68ee;padding:12px 24px;border-radius:30px;'>Register</a>`), 400);
+                setTimeout(() => addBlock('footer', `<p>See you at the webinar!</p><p style='font-size:0.8rem;color:#aaa;'>Unsubscribe | Contact Us</p>`), 600);
+                break;
+            case 'survey':
+                addBlock('header', `<h1 style='color:#4a90e2;'>We Value Your Feedback</h1><p>Help us improve by taking a quick survey.</p>`);
+                setTimeout(() => addBlock('content', `<h3>Survey Instructions</h3><p>Click the link below to start the survey. Your opinion matters!</p>`), 200);
+                setTimeout(() => addBlock('cta', `<p>Take the survey now.</p><a href='#' class='editable-link' style='color:white;background:#7b68ee;padding:12px 24px;border-radius:30px;'>Start Survey</a>`), 400);
+                setTimeout(() => addBlock('footer', `<p>Thank you for helping us grow!</p><p style='font-size:0.8rem;color:#aaa;'>Unsubscribe | Contact Us</p>`), 600);
+                break;
+            case 'reengagement':
+                addBlock('header', `<h1 style='color:#4a90e2;'>We Miss You!</h1><p>It's been a while. Here's something to bring you back.</p>`);
+                setTimeout(() => addBlock('content', `<h3>Special Offer</h3><p>We've reserved a special deal just for you. Come see what's new!</p>`), 200);
+                setTimeout(() => addBlock('cta', `<p>Return and enjoy your offer.</p><a href='#' class='editable-link' style='color:white;background:#7b68ee;padding:12px 24px;border-radius:30px;'>Redeem Now</a>`), 400);
+                setTimeout(() => addBlock('footer', `<p>Hope to see you soon!</p><p style='font-size:0.8rem;color:#aaa;'>Unsubscribe | Contact Us</p>`), 600);
+                break;
+            default:
+                addBlock('header', `<h1 style='color:#4a90e2;'>Welcome!</h1><p>Start building your campaign below.</p>`);
+                setTimeout(() => addBlock('hero', `<h2 style='color:#ff6f61;'>Your Hero Section</h2><p>Share your big announcement here.</p>`), 200);
+                setTimeout(() => addBlock('content', `<h3>Details</h3><p>Describe your offer, event, or update.</p>`), 400);
+                setTimeout(() => addBlock('cta', `<p>Ready to take action?</p><a href='#' class='editable-link' style='color:white;background:#7b68ee;padding:12px 24px;border-radius:30px;'>Click Here</a>`), 600);
+                setTimeout(() => addBlock('footer', `<p>Thank you for reading!</p><p style='font-size:0.8rem;color:#aaa;'>Unsubscribe | Contact Us</p>`), 800);
+        }
     }, 500);
 }
 
@@ -429,7 +1139,10 @@ function fetchAnalytics() {
         .then(data => {
             if (data) {
                 animateMetrics(data);
-                const recentCampaignsContainer = document.querySelector('.card:nth-of-type(2) > div');
+                // Only update the Recent Campaigns box in the Analytics section
+                const analyticsSection = document.getElementById('analytics');
+                const recentCampaignsCard = analyticsSection.querySelector('.card:nth-of-type(2)');
+                const recentCampaignsContainer = recentCampaignsCard ? recentCampaignsCard.querySelector('div') : null;
                 if (recentCampaignsContainer) {
                     recentCampaignsContainer.innerHTML = '';
                     data.recent_campaigns.forEach(campaign => {
