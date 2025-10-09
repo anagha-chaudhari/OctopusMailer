@@ -13,6 +13,7 @@ from models import Campaign, Recipient
 # Assuming your routes are structured in these files
 from routes.campaign_routes import campaign_bp
 from routes.analytics_routes import analytics_bp
+from routes.openai_routes import openai_bp
 
 # Load environment variables from .env file
 load_dotenv()
@@ -36,6 +37,7 @@ def create_app():
     # Register blueprints to include routes
     app.register_blueprint(campaign_bp, url_prefix='/api')
     app.register_blueprint(analytics_bp, url_prefix='/api')
+    app.register_blueprint(openai_bp, url_prefix='/api')
     
     # Optional: Add a simple root route for testing
     @app.route('/')

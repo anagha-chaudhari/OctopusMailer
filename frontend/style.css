@@ -1,3 +1,70 @@
+/* Editing Palette Styles (moved from JS) */
+.editing-palette {
+    display: flex;
+    flex-wrap: wrap;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(255,175,189,0.18), 0 2px 8px rgba(255,195,113,0.13);
+    border-radius: 2.2rem 2.2rem 1.2rem 1.2rem / 2.2rem 2.2rem 1.2rem 1.2rem;
+    border: 2px solid rgba(255,195,113,0.35);
+    background: linear-gradient(135deg, rgba(255, 141, 160, 1) 0%, rgba(255, 196, 113, 1) 100%);
+    min-width: 240px;
+    padding: 0.7rem 1.4rem;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+}
+.editing-palette input[type="color"] {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(255,195,113,0.13);
+    transition: box-shadow 0.2s;
+}
+.editing-palette input[type="color"]:hover {
+    box-shadow: 0 4px 16px rgba(255,175,189,0.23);
+}
+.editing-palette select {
+    font-size: 1.1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 1.2rem;
+    border: 2px solid #ffafbd;
+    background: rgba(255,255,255,0.7);
+    color: #ff6f61;
+    font-family: 'JetBrains Mono', 'Inter', Arial, sans-serif;
+    box-shadow: 0 2px 8px rgba(255,175,189,0.07);
+}
+.editing-palette button {
+    font-size: 1.3rem;
+    padding: 0.5rem 1rem;
+    border-radius: 1.2rem;
+    border: none;
+    background: linear-gradient(135deg, #ff955cff 0%, #ff7e89ff 100%);
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.2s;
+    box-shadow: 0 2px 8px rgba(255,175,189,0.07);
+    margin-right: 0.2rem;
+    font-family: 'JetBrains Mono', 'Inter', Arial, sans-serif;
+    border-bottom: 3px solid #1d1d1dff;
+}
+.editing-palette button.active {
+    background: linear-gradient(135deg, #ff955cff 0%, #ff7e89ff 100%);
+    color: #ff6f61;
+    border-bottom: 3px solid #ffafbd;
+}
+.editing-palette button:last-child {
+    margin-right: 0;
+}
+.editing-palette button:hover {
+    box-shadow: 0 8px 32px rgba(255,175,189,0.18);
+    background: linear-gradient(135deg, #8edcdcff 0%, #8fd7a8ff 100%);
+    transform: scale(0.97);
+    border-bottom: none;
+}
 
         :root {
             --bg-primary: #1a1a1a;
