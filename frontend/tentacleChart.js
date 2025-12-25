@@ -1,9 +1,4 @@
-// Chart.js tentacle-style chart for Campaign Performance
-// This script assumes Chart.js is loaded via CDN in index.html
-// It draws a line chart with custom bezier curves and tentacle-like styling
-
 function drawTentacleChart(ctx, labels, openData, clickData, unsubData) {
-    // Custom plugin for tentacle effect for all datasets
     const tentaclePlugin = {
         id: 'tentacleEffect',
         afterDraw: chart => {
