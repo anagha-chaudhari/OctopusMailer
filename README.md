@@ -1,24 +1,64 @@
 
-# 🐙 OctopusMailer
+# OctopusMailer
 
-**OctopusMailer** is an **AI-powered email automation platform** that makes creating, customizing, and sending personalized email campaigns easy and fun. It combines AI-generated email content with an interactive drag-and-drop editor, allowing users to craft professional emails without technical complexity.
-It uses the **OpenAI API** to generate email drafts based on user prompts. These drafts can then be edited and customized using a **drag-and-drop email builder**, giving users full creative control. The platform is powered by a **Flask backend** and supports **SMTP-based email delivery**, enabling reliable sending of bulk and personalized emails.
-
-The goal of OctopusMailer is to simplify email campaigns for students, creators, and small teams by blending **AI assistance with hands-on customization**.
+A Flask-based email campaign management platform with AI-powered template generation, recipient tracking and analytics.
 
 ---
 
 ## Features
 
-- AI Email Generation
+- 📧 Send bulk HTML email campaigns via SMTP
+- 🤖 AI email template generation using OpenAI (`gpt-4o-mini`)
+- 📝 Email customization using drag-and-drop email builder
+- 📊 Open & click tracking with pixel + redirect analytics
+- 📁 CSV recipient upload and parsing
+- 🗄️ SQLAlchemy
 
-- Interactive Drag and Drop Email Editor
+---
 
-- Mass Email Sending - Send emails to multiple recipients using:
-  * Comma-separated email input
-  * CSV file upload
+## Architecture
+<img width="502" height="667" alt="image" src="https://github.com/user-attachments/assets/150460cf-5822-438a-97af-89b293d2b841" />
 
-- SMTP Based Email Delivery
+---
+
+## Setup
+
+### 1. Clone & install dependencies
+
+```bash
+git clone https://github.com/yourname/octopusmailer.git
+cd octopusmailer
+pip install -r requirements.txt
+```
+
+### 2. Configure environment
+
+Create a `.env` file in the project root:
+
+```env
+OPENAI_API_KEY=sk-...
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=you@gmail.com
+SMTP_PASS=yourpassword
+DATABASE_URL=sqlite:///
+```
+
+### 3. Run
+
+```bash
+python app.py
+```
+
+App runs at `http://localhost:5000`
+
+---
+
+## Tech Stack
+
+Python | Flask | SQLAlchemy | SMTP | OpenAI API | HTML | CSS | JavaScript
+
+---
 
 ## Prototype Demonstration
 https://youtu.be/gGtziIVxYOI?si=fw4IBgyJXKpzLQmq
