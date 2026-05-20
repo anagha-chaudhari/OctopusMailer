@@ -805,6 +805,11 @@ async function generateAITemplate() {
 
         const data = await response.json();
 
+        if (!response.ok) {
+            const message = data.error || 'Failed to generate AI template.';
+            throw new Error(message);
+        }
+
         if (data.error) throw new Error(data.error);
 
         const aiHTML = data.html;

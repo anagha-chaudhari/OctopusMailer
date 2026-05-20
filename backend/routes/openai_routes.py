@@ -17,6 +17,9 @@ def generate_email_template():
         if not prompt:
             return jsonify({"error": "Prompt is required"}), 400
 
+        if not OPENAI_API_KEY:
+            return jsonify({"error": "OPENAI_API_KEY is not configured"}), 500
+
         # Call OpenAI REST API
         url = "https://api.openai.com/v1/chat/completions"
         headers = {
@@ -41,6 +44,10 @@ def generate_email_template():
         return jsonify({"html": ai_html})
 
     except requests.exceptions.HTTPError as http_err:
-        return jsonify({"error": f"HTTP error: {str(http_err)}"}), 500
+        error_body = response.text if response is not None else None
+        return jsonify({
+            "error": f"HTTP error: {str(http_err)}",
+            "details": error_body
+        }), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
