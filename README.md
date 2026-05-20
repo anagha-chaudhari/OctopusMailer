@@ -1,98 +1,124 @@
 # OctopusMailer 🐙
- 
+
 ### Bulk email campaigns with passive open & click tracking - no third-party service required.
-> AI-assisted template generation | Emails and Campaigns with an interactive drag-and-drop editor | pixel-based tracking | per-campaign analytics
- 
-<!-- BADGES -->
+
+> AI-assisted template generation | Interactive drag-and-drop email editor | Pixel-based tracking | Per-campaign analytics
+
+---
+
 <div align="center">
+
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python&logoColor=white)
 ![Flask](https://img.shields.io/badge/Backend-Flask-000000?style=flat-square&logo=flask&logoColor=white)
 ![SQLite](https://img.shields.io/badge/Database-SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white)
 ![OpenAI](https://img.shields.io/badge/AI-GPT--4o--mini-412991?style=flat-square&logo=openai&logoColor=white)
 ![SMTP](https://img.shields.io/badge/Delivery-SMTP%20%2F%20STARTTLS-EA4335?style=flat-square&logoColor=white)
- 
+
 </div>
 
+---
 
 ## Features
 
 - Send bulk HTML email campaigns via SMTP
 - AI email template generation using OpenAI (`gpt-4o-mini`)
-- Email customization using drag-and-drop email builder
-- Open & click tracking with pixel + redirect analytics
+- Email customization using a drag-and-drop email builder
+- Open & click tracking using tracking pixels and redirect analytics
 - CSV recipient upload and parsing
-- SQLAlchemy
+- Modular Flask API architecture
+- SQLAlchemy ORM integration
 
 ---
 
 ## Architecture
 
 <p align="center">
-  <img src="images/arch.png" width="600"/>
+  <img src="images/arch.png" width="700"/>
 </p>
 
-1. Client Layer
-The frontend acts as the interaction layer where users:
+### 1. Client Layer
 
-► create campaigns using a drag-and-drop editor
-► upload recipient CSV files
-► view campaign analytics and engagement metrics
+The frontend acts as the interaction layer where users can:
+
+- Create campaigns using a drag-and-drop editor
+- Upload recipient CSV files
+- View campaign analytics and engagement metrics
 
 The client communicates with the backend only through REST API endpoints.
 
 <p align="center">
-  <img src="images/page1.png" width="600"/>
-</p>
-<p align="center">
-  <img src="images/page2.png" width="600"/>
+  <img src="images/page1.png" width="700"/>
 </p>
 
-2.  Backend API Layer
+<p align="center">
+  <img src="images/page2.png" width="700"/>
+</p>
+
+---
+
+### 2. Backend API Layer
 
 The Flask backend is split into modular APIs:
 
-► Campaign API → handles campaign creation and recipient uploads
-► Analytics API → tracks opens/clicks and returns engagement metrics
-► OpenAI API → generates AI-assisted email content
+- **Campaign API** → handles campaign creation and recipient uploads
+- **Analytics API** → tracks opens/clicks and returns engagement metrics
+- **OpenAI API** → generates AI-assisted email content
 
 <p align="center">
-  <img src="images/analytics.png" width="600"/>
+  <img src="images/analytics.png" width="700"/>
 </p>
 
 <p align="center">
-  <img src="images/aitemp.png" width="600"/>
+  <img src="images/aitemp.png" width="700"/>
 </p>
 
-3. Service Layer
+---
+
+### 3. Service Layer
 
 Business logic is isolated inside dedicated services:
 
-► Email Service manages bulk email delivery and tracking integration
-► Analytics Service computes open rates, click metrics, and dashboard statistics
+- **Email Service** → manages bulk email delivery and tracking integration
+- **Analytics Service** → computes open rates, click metrics, and dashboard statistics
 
-4. Database Design
+---
 
-The system uses a relational SQLite schema with a clear 1:N relationship:
+### 4. Database Design
 
-► One Campaign
-► Many Recipients
+The system uses a relational SQLite schema with a clear `1:N` relationship:
+
+- One `Campaign`
+- Many `Recipients`
 
 Each recipient stores tracking metadata such as:
 
-► opened status
-► clicked status
-► timestamps for engagement events
+- Opened status
+- Clicked status
+- Engagement timestamps
 
 This structure supports analytics computation while maintaining normalized relational modeling.
 
-5. External Integrations
+---
+
+### 5. External Integrations
 
 The architecture integrates with:
 
-SMTP for email delivery
-OpenAI API for AI-generated campaign content
+- SMTP for email delivery
+- OpenAI API for AI-generated campaign content
 
 External services remain isolated from core business logic through dedicated API/service boundaries.
+
+---
+
+## Design Principles
+
+- Modular API architecture
+- Separation of concerns
+- Service-oriented backend design
+- Relational database modeling
+- Minimal external dependencies
+- Scalable and maintainable structure
 
 ---
 
@@ -119,21 +145,26 @@ SMTP_PASS=yourpassword
 DATABASE_URL=sqlite:///
 ```
 
-### 3. Run
+### 3. Run the application
 
 ```bash
 python app.py
 ```
 
-App runs at `http://localhost:5000`
+The app runs at:
+
+```text
+http://localhost:5000
+```
 
 ---
 
 ## Tech Stack
 
-Python | Flask | SQLAlchemy | SMTP | OpenAI API | HTML | CSS | JavaScript
+Python • Flask • SQLAlchemy • SQLite • SMTP • OpenAI API • HTML • CSS • JavaScript
 
 ---
 
 ## Prototype Demonstration
+
 https://youtu.be/gGtziIVxYOI?si=fw4IBgyJXKpzLQmq
