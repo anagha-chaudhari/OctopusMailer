@@ -127,8 +127,6 @@ External services remain isolated from core business logic through dedicated API
 ### 1. Clone & install dependencies
 
 ```bash
-git clone https://github.com/yourname/octopusmailer.git
-cd octopusmailer
 pip install -r requirements.txt
 ```
 
